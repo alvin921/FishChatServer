@@ -231,7 +231,7 @@ func cmd_topic_rsp(self *Client, c *protocol.CmdSimple) error {
 	return nil
 }
 
-func cmd_list(self *Client, args []string) error {
+func cmd_topic_profile(self *Client, args []string) error {
 	if self.bLogin == false {
 		fmt.Println("NOT login yet. Please login first.")
 		return nil
@@ -239,33 +239,31 @@ func cmd_list(self *Client, args []string) error {
 	if len(args) != 2 {
 		return common.SYNTAX_ERROR
 	}
-	cmd := protocol.NewCmdSimple(protocol.REQ_GET_TOPIC_MEMBER_CMD)
+	cmd := protocol.NewCmdSimple(protocol.REQ_GET_TOPIC_PROFILE_CMD)
 	cmd.AddArg(args[1])
 	err := self.session.Send(libnet.Json(cmd))
 
 	return err
 }
 
-func cmd_list_rsp(self *Client, c *protocol.CmdSimple) error {
+func cmd_topic_profile_rsp(self *Client, c *protocol.CmdSimple) error {
 	var num int
-	var err error
 
 	fmt.Println(c.GetCmdName() + " returns: " + c.GetArgs()[0])
 	if c.GetArgs()[0] != protocol.RSP_SUCCESS {
 		return errors.New(c.GetArgs()[0])
 	}
-	if num, err = strconv.Atoi(c.GetArgs()[1]); err != nil {
-		fmt.Println(err.Error())
-		log.Error(err.Error())
-		return err
-	}
-	fmt.Println("GET_TOPIC_MEMBER returns (" + c.GetArgs()[1] + "): ")
+	fmt.Println("GET_TOPIC_PROFILE returns : ")
+	fmt.Println("    topicName: " + c.GetArgs()[1])
+	fmt.Println("    creator: " + c.GetArgs()[2])
+	fmt.Println("    members[]: ")
+	num = (len(c.GetArgs()) - 3) / 3
 	index := 0
 	for {
 		if index == num {
 			break
 		} else {
-			fmt.Println("ID=" + c.GetArgs()[2+2*index] + "\t\t\t, Name=" + c.GetArgs()[2+2*index+1])
+			fmt.Println("        " + c.GetArgs()[3+3*index] + "\t, " + c.GetArgs()[3+3*index+1] + "\t, " + c.GetArgs()[3+3*index+2])
 			index++
 		}
 	}
@@ -548,8 +546,8 @@ func cmd_login(self *Client, args []string) error {
 		case protocol.RSP_GET_TOPIC_LIST_CMD:
 			cmd_topic_rsp(self, &c)
 
-		case protocol.RSP_GET_TOPIC_MEMBER_CMD:
-			cmd_list_rsp(self, &c)
+		case protocol.RSP_GET_TOPIC_PROFILE_CMD:
+			cmd_topic_profile_rsp(self, &c)
 
 		case protocol.RSP_CREATE_TOPIC_CMD:
 			cmd_new_rsp(self, &c)
@@ -647,10 +645,10 @@ func main() {
 			"delete <topic_name>\n",
 			cmd_delete,
 		},
-		"list": {
-			"Get member list of specific topic. You MUST be a member of the topic.\n",
-			"list <topic_name>\n",
-			cmd_list,
+		"profile": {
+			"Get specific topic profile. You MUST be a member of the topic.\n",
+			"profile <topic_name>\n",
+			cmd_topic_profile,
 		},
 		"add": {
 			"Add someone into the topic, only for topic creator\n",

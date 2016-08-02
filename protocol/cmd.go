@@ -149,15 +149,18 @@ const (
 	RSP_ADD_2_TOPIC_CMD = "RSP_ADD_2_TOPIC"
 	/*
 
-	   client -> MsgServer
-	       REQ_ADD_2_TOPIC_CMD
-	       arg0: TopicName     //群组名
-	       arg1: NewClientID          //用户ID
-	       arg2: NewClientName    //用户在Topic中的Name, 对于device, 可以是儿子/女儿
+		client -> MsgServer
+		  REQ_ADD_2_TOPIC_CMD
+		    arg0: TopicName     //群组名
+		    arg1: NewClientID          //用户ID
+		    arg2: NewClientName    //用户在Topic中的Name, 对于device, 可以是儿子/女儿
 
-	   MsgServer -> client
-	       RSP_ADD_2_TOPIC_CMD
-	       arg0: SUCCESS/ERROR
+		MsgServer -> client
+		  RSP_ADD_2_TOPIC_CMD
+		    arg0: SUCCESS/ERROR
+			arg1: TopicName
+			arg2: ClientID
+			arg3: ClientType
 	*/
 
 	REQ_KICK_TOPIC_CMD = "REQ_KICK_TOPIC"
@@ -245,23 +248,22 @@ const (
 	       arg4: TopicName3
 	*/
 
-	REQ_GET_TOPIC_MEMBER_CMD = "REQ_GET_TOPIC_MEMBER"
-	RSP_GET_TOPIC_MEMBER_CMD = "RSP_GET_TOPIC_MEMBER"
+	REQ_GET_TOPIC_PROFILE_CMD = "REQ_GET_TOPIC_PROFILE"
+	RSP_GET_TOPIC_PROFILE_CMD = "RSP_GET_TOPIC_PROFILE"
 
 	/*
-			   device/client -> MsgServer
-				  	REQ_GET_TOPIC_MEMBER_CMD
-				   	arg0: TopicName
-				    如果ClientID不是TopicName的成员，则返回失败
+		   device/client -> MsgServer
+			  	REQ_GET_TOPIC_MEMBER_CMD
+			   	arg0: TopicName
+			    如果ClientID不是TopicName的成员，则返回失败
 
-			   MsgServer -> device/client
-				   	RSP_GET_TOPIC_MEMBER_CMD
-				   	arg0: SUCCESS/ERROR
-		            arg1: MemberNum     // topic member数目，后面跟随该数目的member
-		            arg2: Member1ID
-		            arg3: Member1Name
-		            arg4: Member2ID
-		            arg5: Member2Name
+		   MsgServer -> device/client
+			   	RSP_GET_TOPIC_MEMBER_CMD
+			   	arg0: SUCCESS/ERROR
+				// followed by topic profile
+				// topicName
+				// creator
+				// members[]
 	*/
 
 )

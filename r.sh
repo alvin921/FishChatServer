@@ -203,6 +203,40 @@ case "x$1" in
 esac
 }
 
+function status {
+	pids=`ps -ef | grep $1 | awk '{print $2}'`
+	for item in ${pids[*]}; do
+		echo "$1:$item"
+	done
+}
+
+function proc_status {
+case "x$1" in
+	"x"|"xserver")
+		status monitor
+		status manager
+		status router
+		status gateway
+		status msg_server
+		;;
+	"xmanager"|"xmonitor"|"xrouter"|"xgateway"|"xmsg_server")
+		status $1
+		;;
+	"xredis")
+		#if [ $OS == "linux" ] 
+		#then
+		#else
+		#fi
+		;;
+	"xmongo")
+		#if [ $OS == "linux" ] 
+		#then
+		#else
+		#fi
+		;;
+esac
+}
+
 case "$1" in 
 	clean)
 		proc_clean $2 ;;
@@ -212,6 +246,8 @@ case "$1" in
 		proc_start $2 ;;
 	stop)
 		proc_stop $2 ;;
+	status)
+		proc_status $2 ;;
 	help)
 		proc_help $2 ;;
 	*)

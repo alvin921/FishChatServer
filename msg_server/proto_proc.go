@@ -584,8 +584,11 @@ func (self *ProtoProc) procCreateTopic(cmd protocol.Cmd, session *libnet.Session
 ErrOut:
 	if err != nil {
 		resp.AddArg(err.Error())
+		resp.AddArg(topicName)
 	} else {
 		resp.AddArg(protocol.RSP_SUCCESS)
+		resp.AddArg(topicName)
+		resp.AddArg(ClientName)
 	}
 	err = session.Send(libnet.Json(resp))
 	if err != nil {
@@ -655,7 +658,10 @@ ErrOut:
 
    MsgServer -> client
        RSP_ADD_2_TOPIC_CMD
-       arg0: SUCCESS/FAILED
+    	arg0: SUCCESS/FAILED
+		arg1: TopicName
+		arg2: ClientID
+		arg3: ClientType
 */
 func (self *ProtoProc) procAdd2Topic(cmd protocol.Cmd, session *libnet.Session) error {
 	log.Info("procAdd2Topic")
@@ -666,6 +672,7 @@ func (self *ProtoProc) procAdd2Topic(cmd protocol.Cmd, session *libnet.Session) 
 	mName := cmd.GetArgs()[2]
 	ClientID := session.State.(*base.SessionState).ClientID
 	ClientType := session.State.(*base.SessionState).ClientType
+	mType := protocol.DEV_TYPE_CLIENT
 
 	resp := protocol.NewCmdSimple(protocol.RSP_ADD_2_TOPIC_CMD)
 
@@ -693,7 +700,8 @@ func (self *ProtoProc) procAdd2Topic(cmd protocol.Cmd, session *libnet.Session) 
 				log.Warningf("Client %s not online", mID)
 				err = common.NOT_ONLINE
 			} else {
-				member := mongo_store.NewMember(mID, mName, sessionCacheData.ClientType)
+				mType = sessionCacheData.ClientType
+				member := mongo_store.NewMember(mID, mName, mType)
 				err = self.msgServer.procJoinTopic(member, topicName)
 			}
 		}
@@ -704,6 +712,9 @@ func (self *ProtoProc) procAdd2Topic(cmd protocol.Cmd, session *libnet.Session) 
 	} else {
 		resp.AddArg(protocol.RSP_SUCCESS)
 	}
+	resp.AddArg(topicName)
+	resp.AddArg(mID)
+	resp.AddArg(mType)
 	err = session.Send(libnet.Json(resp))
 	if err != nil {
 		log.Error(err.Error())
@@ -1078,16 +1089,17 @@ ErrOut:
        arg4: Member3
 */
 
-func (self *ProtoProc) procGetTopicMember(cmd protocol.Cmd, session *libnet.Session) error {
-	log.Info("procGetTopicMember")
+func (self *ProtoProc) procGetTopicProfile(cmd protocol.Cmd, session *libnet.Session) error {
+	log.Info("procGetTopicProfile")
 	var err error
 	var topicCacheData *redis_store.TopicCacheData
 
-	resp := protocol.NewCmdSimple(protocol.RSP_GET_TOPIC_MEMBER_CMD)
+	topicName := "<N/A>"
+	resp := protocol.NewCmdSimple(protocol.RSP_GET_TOPIC_PROFILE_CMD)
 	if len(cmd.GetArgs()) != 1 {
 		err = common.SYNTAX_ERROR
 	} else {
-		topicName := cmd.GetArgs()[0]
+		topicName = cmd.GetArgs()[0]
 
 		clientID := session.State.(*base.SessionState).ClientID
 		//clientType := session.State.(*base.SessionState).ClientType
@@ -1106,12 +1118,15 @@ func (self *ProtoProc) procGetTopicMember(cmd protocol.Cmd, session *libnet.Sess
 
 	if err != nil {
 		resp.AddArg(err.Error())
+		resp.AddArg(topicName)
 	} else {
 		resp.AddArg(protocol.RSP_SUCCESS)
-		resp.AddArg(strconv.Itoa(len(topicCacheData.MemberList)))
+		resp.AddArg(topicName)
+		resp.AddArg(topicCacheData.CreaterID)
 		for _, member := range topicCacheData.MemberList {
 			resp.AddArg(member.ID)
 			resp.AddArg(member.Name)
+			resp.AddArg(member.Type)
 		}
 	}
 	err = session.Send(libnet.Json(resp))

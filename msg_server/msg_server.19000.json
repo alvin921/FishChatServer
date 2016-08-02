@@ -1,5 +1,5 @@
 {
-	"LocalIP"                  : "127.0.0.1:19000",
+	"LocalIP"                  : "192.168.10.100:19000",
 	"TransportProtocols"       : "tcp",
 	"Listen"                   : "0.0.0.0:19000",
 	"LogFile"                  : "msg_server.log",
@@ -9,7 +9,7 @@
 	"MonitorBeatTime"          : 5,
 	
 	"SessionManagerServerList" : [
-		"127.0.0.1:18000"
+		"192.168.10.100:18000"
 	],
 	
 	"Redis"                    : { 
@@ -21,7 +21,7 @@
 	},
 	
 	"Mongo"              : { 
-			"Addr"      : "127.0.0.1", 
+			"Addr"      : "192.168.10.100", 
 			"Port"      : ":27017",
 			"User"      : "",
 			"Password"  : ""

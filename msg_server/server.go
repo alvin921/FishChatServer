@@ -463,8 +463,8 @@ func (self *MsgServer) parseProtocol(cmd []byte, session *libnet.Session) error 
 			return err
 		}
 
-	case protocol.REQ_GET_TOPIC_MEMBER_CMD:
-		err = pp.procGetTopicMember(&c, session)
+	case protocol.REQ_GET_TOPIC_PROFILE_CMD:
+		err = pp.procGetTopicProfile(&c, session)
 		if err != nil {
 			log.Error("error:", err)
 			return err
